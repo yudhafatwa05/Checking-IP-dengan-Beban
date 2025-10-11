@@ -68,26 +68,7 @@ chmod +x check_latency_raw.sh
 
 Output langsung tampil di terminal
 
-File hasil otomatis tersimpan di:
-
-hasil_ping_raw_YYYY-MM-DD_HH-MM-SS.log
-Contoh Output
-Mulai uji ping dengan beban 65500 bytes (27 paket per IP)
-Log disimpan di: hasil_ping_raw_2025-10-11_15-45-27.log
-==============================================================
-
-🔹 Testing 10.43.13.187 dengan paket 65500 bytes...
---------------------------------------------------------------
-🔹 Host: 10.43.13.187
---------------------------------------------------------------
-PING 10.43.13.187 (10.43.13.187) 65500(65528) bytes of data.
-65508 bytes from 10.43.13.187: icmp_seq=1 ttl=64 time=12.5 ms
-65508 bytes from 10.43.13.187: icmp_seq=2 ttl=64 time=11.9 ms
-...
---- 10.43.13.187 ping statistics ---
-27 packets transmitted, 26 received, 3.7037% packet loss, time 26063ms
-rtt min/avg/max/mdev = 11.965/13.216/14.758/0.577 ms
-==============================================================
+File hasil otomatis tersimpan di Folder
 
 ⚙️ Parameter Default
 Parameter	Nilai	Keterangan
