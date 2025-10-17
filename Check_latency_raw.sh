@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 FOLDER="${1:-.}"     # Folder default: current directory
-COUNT=50              # Jumlah paket per IP
+COUNT=100              # Jumlah paket per IP
 SIZE=65500            # Ukuran beben pakketbytes
 DELAY=1.0             # Delay antar ping (detikk)
 
