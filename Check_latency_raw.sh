@@ -2,8 +2,8 @@
 
 FOLDER="${1:-.}"
 COUNT=100
-SIZE=1400
-DELAY=0.2
+SIZE=65500
+DELAY=0.1
 
 timestamp=$(date '+%Y-%m-%d_%H-%M-%S')
 OUTFILE="hasil_lpr_test_${timestamp}.log"
