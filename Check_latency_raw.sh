@@ -17,27 +17,30 @@ if [[ ! -s "$TMPFILE" ]]; then
   exit 1
 fi
 
+# Warna
+GREEN="\e[32m"
+YELLOW="\e[33m"
+RED="\e[31m"
+NC="\e[0m"
+
 spinner() {
   local pid=$1
-  local delay=0.1
-  local spinstr='|/-\'
+  local spin='-\|/'
+  local i=0
   while ps -p $pid > /dev/null 2>&1; do
-    local temp=${spinstr#?}
-    printf " [%c]  Testing..." "$spinstr"
-    spinstr=$temp${spinstr%"$temp"}
-    sleep $delay
-    printf "\r"
+    i=$(( (i+1) %4 ))
+    printf "\r   Testing... %s" "${spin:$i:1}"
+    sleep .1
   done
-  printf "                    \r"
+  printf "\r                    \r"
 }
 
-echo "=== LPR NETWORK TEST ===" | tee -a "$OUTFILE"
-echo
+echo -e "\n=== LPR NETWORK TEST ===\n" | tee -a "$OUTFILE"
 
 while IFS= read -r host; do
   [[ -z "$host" ]] && continue
 
-  printf "🔹 %s " "$host"
+  echo -e "🔹 IP: $host" | tee -a "$OUTFILE"
 
   ping -c $COUNT -s $SIZE -i $DELAY -W 2 "$host" > /tmp/ping_result.$$ 2>/dev/null &
   PID=$!
@@ -46,25 +49,30 @@ while IFS= read -r host; do
   wait $PID
 
   RESULT=$(grep "packet loss" /tmp/ping_result.$$)
+  RTT=$(grep "rtt min" /tmp/ping_result.$$)
+
   LOSS=$(echo "$RESULT" | awk -F',' '{print $3}' | awk '{print $1}' | tr -d '%')
+  AVG=$(echo "$RTT" | awk -F'/' '{print $5}')
 
   if [[ -z "$LOSS" ]]; then
-    STATUS="❌ NO RESPONSE"
+    STATUS="${RED}NO RESPONSE ❌${NC}"
   elif (( $(echo "$LOSS == 0" | bc -l) )); then
-    STATUS="✅ RECOMMENDED"
+    STATUS="${GREEN}RECOMMENDED ✅${NC}"
   elif (( $(echo "$LOSS <= 1" | bc -l) )); then
-    STATUS="✅ SAFE"
+    STATUS="${GREEN}SAFE ✅${NC}"
   elif (( $(echo "$LOSS <= 3" | bc -l) )); then
-    STATUS="⚠️ WARNING"
+    STATUS="${YELLOW}WARNING ⚠️${NC}"
   else
-    STATUS="❌ NOT RECOMMENDED"
+    STATUS="${RED}NOT RECOMMENDED ❌${NC}"
   fi
 
-  echo "Packet Loss: ${LOSS}% → $STATUS" | tee -a "$OUTFILE"
+  echo -e "   Packet Loss : ${LOSS}%"
+  echo -e "   Avg Latency : ${AVG} ms"
+  echo -e "   Status LPR  : $STATUS"
+  echo "--------------------------------------------------" | tee -a "$OUTFILE"
 
 done < "$TMPFILE"
 
 rm -f "$TMPFILE" /tmp/ping_result.$$
 
-echo
-echo "Selesai. Log disimpan di: $OUTFILE disini ga ya ges ya "
+echo -e "\nSelesai. Log disimpan di: $OUTFILE\n"
