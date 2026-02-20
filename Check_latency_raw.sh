@@ -1,45 +1,42 @@
 #!/usr/bin/env bash
 
-FOLDER="${1:-.}"     # Folder default: current directory
-COUNT=100              # Jumlah paket per IP
-SIZE=65500            # Ukuran beben pakketbytes
-DELAY=1.0             # Delay antar ping (detikk)
+FOLDER="${1:-.}"
+COUNT=100
+SIZE=65500
+DELAY=1.0
 
 timestamp=$(date '+%Y-%m-%d_%H-%M-%S')
-OUTFILE="hasil_ping_raw_${timestamp}.log"
+OUTFILE="hasil_packet_loss_${timestamp}.log"
 
-# Ambil semua IP unik dari file .txt
 TMPFILE=$(mktemp)
 grep -hEv '^\s*(#|$)' "$FOLDER"/*.txt 2>/dev/null | sort -u > "$TMPFILE"
 
 if [[ ! -s "$TMPFILE" ]]; then
-  echo "IP tidak di temukan: $FOLDER"
+  echo "IP tidak ditemukan di folder: $FOLDER"
   rm -f "$TMPFILE"
   exit 1
 fi
 
-echo "Mulai uji ping dengan beban ${SIZE} bytes (${COUNT} paket per IP)"
-echo "Log disimpan di: $OUTFILE"
-echo "="
+echo "=== HASIL PACKET LOSS TEST ===" | tee -a "$OUTFILE"
 echo
 
 while IFS= read -r host; do
   [[ -z "$host" ]] && continue
 
-  echo "🔹 Testing $host dengan paket $SIZE bytes..."
-  echo "--------------------------------------------------------------" | tee -a "$OUTFILE"
-  echo "🔹 Host: $host" | tee -a "$OUTFILE"
-  echo "--------------------------------------------------------------" | tee -a "$OUTFILE"
+  RESULT=$(ping -c $COUNT -s $SIZE -i $DELAY -W 2 "$host" 2>/dev/null \
+    | grep "packet loss")
 
-  # Jalankan ping dan tampilkan hasil mentah
-  ping -c $COUNT -s $SIZE -i $DELAY -W 2 "$host" | tee -a "$OUTFILE"
+  LOSS=$(echo "$RESULT" | awk -F',' '{print $3}' | awk '{print $1}')
 
-  echo -e "\n" | tee -a "$OUTFILE"
-  echo "==============================================================" | tee -a "$OUTFILE"
-  echo | tee -a "$OUTFILE"
+  if [[ -z "$LOSS" ]]; then
+    echo "$host -> TIMEOUT / NO RESPONSE ❌" | tee -a "$OUTFILE"
+  else
+    echo "$host -> Packet Loss: $LOSS" | tee -a "$OUTFILE"
+  fi
 
 done < "$TMPFILE"
 
 rm -f "$TMPFILE"
 
-echo "✅ Selesai! Semua hasil tersimpan ya geas ya di: $OUTFILE"
+echo
+echo "Selesai. Log disimpan di: $OUTFILE ini ya gaes ya "
