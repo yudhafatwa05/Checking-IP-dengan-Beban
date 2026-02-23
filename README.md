@@ -1,99 +1,70 @@
-🧩 Deskripsi Proyek
+📡 LPR Network Test Script
 
-Script ini digunakan untuk melakukan pengujian latency dan packet loss pada sekumpulan IP address secara otomatis menggunakan perintah ping di Linux.
-Setiap pengujian dikirimkan dengan beban besar (65500 bytes) untuk mensimulasikan lalu lintas data berat, sehingga hasil lebih realistis dibandingkan ping biasa.
+Bash script untuk menguji kualitas jaringan (Packet Loss & Latency) terhadap daftar IP secara otomatis dan menentukan apakah IP tersebut RECOMMENDED untuk LPR atau tidak.
 
-Script ini cocok digunakan untuk:
+Script ini melakukan stress-test ringan menggunakan ping dengan ukuran paket besar dan interval cepat, lalu mengkategorikan hasilnya.
 
-Pengujian performa jaringan antar site (misalnya antar lokasi kantor, NUC, atau IP Camera)
+🚀 Fitur
 
-Diagnostik jaringan (latency tinggi, packet loss)
+✅ Membaca banyak file .txt dalam satu folder
 
-Monitoring konektivitas LAN/WAN dengan ukuran paket besar
+✅ Menghapus komentar dan duplikasi IP
 
-Dokumentasi hasil uji jaringan dalam bentuk log file (.log)
+✅ Stress test dengan packet besar
 
-⚙️ Fitur Utama
+✅ Menampilkan Packet Loss & Average Latency
 
-✅ Mendukung banyak IP dari file .txt dalam satu folder
-✅ Menjalankan ping otomatis untuk setiap IP
-✅ Menggunakan ukuran paket 65500 bytes (beban besar)
-✅ Menyimpan hasil lengkap ke file log (hasil_ping_raw_<timestamp>.log)
-✅ Output mengikuti format asli ping, lengkap dengan:
+✅ Status otomatis (RECOMMENDED / SAFE / WARNING / NOT RECOMMENDED)
 
-27 packets transmitted, 26 received, 3.7037% packet loss, time 26063ms
-rtt min/avg/max/mdev = 11.965/13.216/14.758/0.577 ms
+✅ Spinner loading saat proses berjalan
 
+✅ Log hasil otomatis tersimpan
 
-✅ Dapat diatur interval antar ping (-i)
-✅ Mudah dijalankan dan ringan (bash murni, tanpa dependensi tambahan)
+📂 Format Input
 
-🧠 Cara Kerja Singkat
+Masukkan daftar IP ke dalam file .txt.
 
-Script akan membaca semua file .txt di dalam folder yang diberikan,
-kemudian mengeksekusi ping untuk setiap IP di file tersebut dengan parameter:
+Contoh:
 
-ping -c 27 -s 65500 -i 1 -W 2 <ip_address>
+# daftar ip test
+8.8.8.8
+1.1.1.1
+192.168.1.1
 
+Kamu bisa menyimpan banyak file .txt dalam satu folder.
 
-Hasil dari setiap pengujian akan dicetak langsung di terminal dan disimpan ke file log otomatis di folder yang sama.
+⚙️ Cara Menjalankan
+sudo mkdir Test-Jaringan
+lalu masuk ke folder Test-Jaringan
+lalu berikan permission executable
 
-Cara Menggunakan
-1️Buat folder dan file daftar IP
-mkdir ~/ip_monitoring
-cd ~/ip_monitoring
-nano ip_list.txt
+sudo chmod +x Check_latency_raw.sh
+2️⃣ Jalankan script
+sudo bash Check_latency_raw.sh
 
-
-Isi dengan daftar IP:
-
-10.43.13.187
-10.43.13.164
-10.43.13.165
-...
-
-2️⃣ Simpan script check_latency_raw.sh
-nano check_latency_raw.sh
+tunggu Hasilnya
 
 
-(paste script utama di sini)
-
-3️⃣ Jadikan executable
-chmod +x check_latency_raw.sh
-
-4️⃣ Jalankan script
-./check_latency_raw.sh .
-
-5️⃣ Lihat hasil
-
-Output langsung tampil di terminal
-
-File hasil otomatis tersimpan di Folder
-
-⚙️ Parameter Default
+🧪 Parameter Default Test
 Parameter	Nilai	Keterangan
-COUNT	27	Jumlah ping per IP
-SIZE	65500	Ukuran paket (bytes)
-INTERVAL	1	Jeda antar paket (-i, detik)
-TIMEOUT	2	Timeout per paket (detik)
+COUNT	100	Jumlah paket
+SIZE	65500	Ukuran packet (stress test)
+DELAY	0.1	Interval antar ping
+📊 Output Contoh
+🔹 IP: 8.8.8.8
+   Packet Loss : 0%
+   Avg Latency : 12.3 ms
+   Status LPR  : RECOMMENDED ✅
+--------------------------------------------------
+📁 Log File
 
-Semua nilai bisa disesuaikan di bagian atas script sesuai kebutuhan.
+Hasil test otomatis tersimpan dengan format:
 
-🧭 Catatan Teknis
-
-Ukuran paket 65500 bytes mendekati batas maksimum MTU jaringan (ideal untuk stress test).
-
-Interval standar 1 detik (-i 1) sudah aman untuk jaringan umum.
-
-Interval <0.2 detik (-i 0.2) memerlukan akses root (sudo).
-
-🧰 Contoh Penggunaan Lain
-
-Ping cepat (interval 0.5 detik):
-
-sudo ./check_latency_raw.sh . 0.5
-
-
-Ping lambat (interval 2 detik):
-
-./check_latency_raw.sh . 2
+hasil_lpr_test_YYYY-MM-DD_HH-MM-SS.log
+📌 Kategori Status
+Packet Loss	Status
+0%	RECOMMENDED ✅
+≤ 1%	SAFE ✅
+≤ 3%	WARNING ⚠️
+> 3%	NOT RECOMMENDED ❌
+No Response	NO RESPONSE ❌
