@@ -34,11 +34,11 @@ Contoh:
 Kamu bisa menyimpan banyak file .txt dalam satu folder.
 
 ⚙️ Cara Menjalankan
-sudo mkdir Test-Jaringan
-lalu masuk ke folder Test-Jaringan
+ masuk ke folder Checking-IP-dengan-Beban
 lalu berikan permission executable
 
 sudo chmod +x Check_latency_raw.sh
+
 2️⃣ Jalankan script
 sudo bash Check_latency_raw.sh
 
