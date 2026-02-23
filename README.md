@@ -20,14 +20,16 @@ sudo chmod +x Check_latency_raw.sh
 2️⃣ Jalankan script
 sudo bash Check_latency_raw.sh
 
-tunggu Hasilnya
+tunggu Hasilnya 
 
 
 🧪 Parameter Default Test
-Parameter	Nilai	Keterangan
-COUNT	100	Jumlah paket
-SIZE	65500	Ukuran packet (stress test)
-DELAY	0.1	Interval antar ping
+
+1.	Parameter	Nilai	Keterangan
+2.	COUNT	100	Jumlah paket
+3.	SIZE	65500	Ukuran packet (stress test)
+4.	DELAY	0.1	Interval antar ping
+
 📊 Output Contoh
 🔹 IP: 8.8.8.8
    Packet Loss : 0%
