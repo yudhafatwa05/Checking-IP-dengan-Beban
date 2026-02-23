@@ -1,27 +1,5 @@
 📡 LPR Network Test Script
 
-Bash script untuk menguji kualitas jaringan (Packet Loss & Latency) terhadap daftar IP secara otomatis dan menentukan apakah IP tersebut RECOMMENDED untuk LPR atau tidak.
-
-Script ini melakukan stress-test ringan menggunakan ping dengan ukuran paket besar dan interval cepat, lalu mengkategorikan hasilnya.
-
-🚀 Fitur
-
-✅ Membaca banyak file .txt dalam satu folder
-
-✅ Menghapus komentar dan duplikasi IP
-
-✅ Stress test dengan packet besar
-
-✅ Menampilkan Packet Loss & Average Latency
-
-✅ Status otomatis (RECOMMENDED / SAFE / WARNING / NOT RECOMMENDED)
-
-✅ Spinner loading saat proses berjalan
-
-✅ Log hasil otomatis tersimpan
-
-📂 Format Input
-
 Masukkan daftar IP ke dalam file .txt.
 
 Contoh:
