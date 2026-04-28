@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-FOLDER="${1:-.}"
+FILE="${1:-list_ip.txt}"
 COUNT=100
 SIZE=65500
 DELAY=0.1
@@ -8,12 +8,8 @@ DELAY=0.1
 timestamp=$(date '+%Y-%m-%d_%H-%M-%S')
 OUTFILE="hasil_lpr_test_${timestamp}.log"
 
-TMPFILE=$(mktemp)
-grep -hEv '^\s*(#|$)' "$FOLDER"/*.txt 2>/dev/null | sort -u > "$TMPFILE"
-
-if [[ ! -s "$TMPFILE" ]]; then
-  echo "IP tidak ditemukan di folder: $FOLDER"
-  rm -f "$TMPFILE"
+if [[ ! -f "$FILE" ]]; then
+  echo "File tidak ditemukan: $FILE"
   exit 1
 fi
 
@@ -37,12 +33,12 @@ spinner() {
 
 echo -e "\n=== LPR NETWORK TEST ===\n" | tee -a "$OUTFILE"
 
-while IFS= read -r host; do
-  [[ -z "$host" ]] && continue
+while IFS=$'\t' read -r NAME IP; do
+  [[ -z "$IP" ]] && continue
 
-  echo -e "🔹 IP: $host" | tee -a "$OUTFILE"
+  echo -e "🔹 Gate: $NAME | IP: $IP" | tee -a "$OUTFILE"
 
-  ping -c $COUNT -s $SIZE -i $DELAY -W 2 "$host" > /tmp/ping_result.$$ 2>/dev/null &
+  ping -c $COUNT -s $SIZE -i $DELAY -W 2 "$IP" > /tmp/ping_result.$$ 2>/dev/null &
   PID=$!
 
   spinner $PID
@@ -71,8 +67,8 @@ while IFS= read -r host; do
   echo -e "   Status LPR  : $STATUS"
   echo "--------------------------------------------------" | tee -a "$OUTFILE"
 
-done < "$TMPFILE"
+done < "$FILE"
 
-rm -f "$TMPFILE" /tmp/ping_result.$$
+rm -f /tmp/ping_result.$$
 
 echo -e "\nSelesai. Log disimpan di: $OUTFILE\n"
