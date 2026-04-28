@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FILE="${1:-list_ip.txt}"
+FILE="${1:-ip_list.txt}"
 COUNT=100
 SIZE=65500
 DELAY=0.1
@@ -23,40 +23,47 @@ spinner() {
   local pid=$1
   local spin='-\|/'
   local i=0
-  while ps -p $pid > /dev/null 2>&1; do
+  while kill -0 "$pid" 2>/dev/null; do
     i=$(( (i+1) %4 ))
     printf "\r   Testing... %s" "${spin:$i:1}"
-    sleep .1
+    sleep 0.1
   done
   printf "\r                    \r"
 }
 
 echo -e "\n=== LPR NETWORK TEST ===\n" | tee -a "$OUTFILE"
 
-while IFS=$'\t' read -r NAME IP; do
-  [[ -z "$IP" ]] && continue
+while read -r NAME IP; do
+  [[ -z "$NAME" || -z "$IP" ]] && continue
 
   echo -e "🔹 Gate: $NAME | IP: $IP" | tee -a "$OUTFILE"
 
-  ping -c $COUNT -s $SIZE -i $DELAY -W 2 "$IP" > /tmp/ping_result.$$ 2>/dev/null &
+  TMP=$(mktemp)
+
+  ping -c "$COUNT" -s "$SIZE" -i "$DELAY" -W 2 "$IP" > "$TMP" 2>/dev/null &
   PID=$!
 
-  spinner $PID
-  wait $PID
+  spinner "$PID"
+  wait "$PID"
 
-  RESULT=$(grep "packet loss" /tmp/ping_result.$$)
-  RTT=$(grep "rtt min" /tmp/ping_result.$$)
+  RESULT=$(grep -i "packet loss" "$TMP")
+  RTT=$(grep -Ei "rtt|round-trip" "$TMP")
 
-  LOSS=$(echo "$RESULT" | awk -F',' '{print $3}' | awk '{print $1}' | tr -d '%')
+  LOSS=$(echo "$RESULT" | awk -F',' '{print $3}' | tr -dc '0-9.')
   AVG=$(echo "$RTT" | awk -F'/' '{print $5}')
 
-  if [[ -z "$LOSS" ]]; then
+  # Default jika gagal parsing
+  [[ -z "$LOSS" ]] && LOSS=100
+  [[ -z "$AVG" ]] && AVG="N/A"
+
+  # Logic tanpa bc (lebih aman)
+  if [[ "$LOSS" == "100" ]]; then
     STATUS="${RED}NO RESPONSE ❌${NC}"
-  elif (( $(echo "$LOSS == 0" | bc -l) )); then
+  elif (( $(printf "%.0f" "$LOSS") == 0 )); then
     STATUS="${GREEN}RECOMMENDED ✅${NC}"
-  elif (( $(echo "$LOSS <= 1" | bc -l) )); then
+  elif (( $(printf "%.0f" "$LOSS") <= 1 )); then
     STATUS="${GREEN}SAFE ✅${NC}"
-  elif (( $(echo "$LOSS <= 3" | bc -l) )); then
+  elif (( $(printf "%.0f" "$LOSS") <= 3 )); then
     STATUS="${YELLOW}WARNING ⚠️${NC}"
   else
     STATUS="${RED}NOT RECOMMENDED ❌${NC}"
@@ -67,8 +74,8 @@ while IFS=$'\t' read -r NAME IP; do
   echo -e "   Status LPR  : $STATUS"
   echo "--------------------------------------------------" | tee -a "$OUTFILE"
 
-done < "$FILE"
+  rm -f "$TMP"
 
-rm -f /tmp/ping_result.$$
+done < "$FILE"
 
 echo -e "\nSelesai. Log disimpan di: $OUTFILE\n"
